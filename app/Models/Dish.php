@@ -19,11 +19,13 @@ class Dish extends Model
         'order_again',
     ];
 
-    public function restaurants(): BelongsTo{
+    public function restaurant(): BelongsTo
+    {
         return $this->belongsTo(Restaurant::class);
     }
 
-    protected function casts(): array{
+    protected function casts(): array
+    {
         return [
             'rating' => 'decimal:1',
             'order_again' => 'boolean',
