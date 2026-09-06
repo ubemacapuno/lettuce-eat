@@ -1,1 +1,31 @@
-//
+import { createApp } from 'vue';
+
+import AutoHide from './components/AutoHide.vue';
+import ConfirmButton from './components/ConfirmButton.vue';
+import NavBar from './components/NavBar.vue';
+import StarRating from './components/StarRating.vue';
+
+/**
+ * Every Vue component that a Blade view is allowed to mount.
+ * Add new ones here, then use them from Blade with:
+ *
+ *   <div data-vue="StarRating" data-props='@json(['name' => 'rating'])'></div>
+ */
+const islands = {
+    AutoHide,
+    ConfirmButton,
+    NavBar,
+    StarRating,
+};
+
+document.querySelectorAll('[data-vue]').forEach((el) => {
+    const component = islands[el.dataset.vue];
+
+    if (! component) {
+        console.warn(`Unknown Vue island: "${el.dataset.vue}"`);
+
+        return;
+    }
+
+    createApp(component, JSON.parse(el.dataset.props || '{}')).mount(el);
+});
