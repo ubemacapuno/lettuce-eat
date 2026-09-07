@@ -37,4 +37,5 @@ phpunit.xml
 .junie
 .editorconfig
 .DS_Store
-*.md
+docs
+**/*.md

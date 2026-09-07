@@ -60,4 +60,4 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 ## Self-hosting
 
 This app is built to run on a Raspberry Pi behind Tailscale, using SQLite and a
-single FrankenPHP container. See [DEPLOYMENT.md](DEPLOYMENT.md).
+single FrankenPHP container. See [docs/deployment.md](docs/deployment.md).
