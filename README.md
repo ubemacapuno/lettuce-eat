@@ -56,3 +56,8 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Self-hosting
+
+This app is built to run on a Raspberry Pi behind Tailscale, using SQLite and a
+single FrankenPHP container. See [DEPLOYMENT.md](DEPLOYMENT.md).
