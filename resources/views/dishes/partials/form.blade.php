@@ -26,9 +26,8 @@
 <label for="order_again"
        class="flex cursor-pointer items-start gap-3 rounded-md border border-input p-3 transition-colors hover:bg-accent/40">
     <input type="hidden" name="order_again" value="0">
-    <input type="checkbox" id="order_again" name="order_again" value="1"
-           class="mt-0.5 h-4 w-4 rounded border-input bg-transparent text-primary focus:ring-1 focus:ring-ring focus:ring-offset-0"
-           @checked(old('order_again', $dish?->order_again))>
+    <x-checkbox id="order_again" name="order_again" value="1" class="mt-0.5"
+                :checked="(bool) old('order_again', $dish?->order_again)" />
     <span>
         <span class="block text-sm font-medium leading-none text-foreground">{{ __('Order again?') }}</span>
         <span class="mt-1 block text-sm text-muted-foreground">{{ __('Worth repeating next time you go.') }}</span>

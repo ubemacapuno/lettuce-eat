@@ -27,7 +27,7 @@
         <!-- Remember Me -->
         <div class="block mt-4">
             <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-input bg-transparent text-primary shadow-sm focus:ring-1 focus:ring-ring focus:ring-offset-0" name="remember">
+                <x-checkbox id="remember_me" name="remember" />
                 <span class="ms-2 text-sm text-muted-foreground">{{ __('Remember me') }}</span>
             </label>
         </div>
