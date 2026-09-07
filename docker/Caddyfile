@@ -1,0 +1,21 @@
+{
+	frankenphp
+	order php_server before file_server
+
+	# Tailscale terminates TLS in front of this container, so Caddy serves plain
+	# HTTP on the loopback interface only. Turning auto_https off stops Caddy
+	# from trying to provision a certificate it neither needs nor can get.
+	auto_https off
+}
+
+:80 {
+	root /app/public
+	encode zstd gzip
+
+	log {
+		output stderr
+		format console
+	}
+
+	php_server
+}

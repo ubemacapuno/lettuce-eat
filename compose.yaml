@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    image: lettuce-eat:latest
+    container_name: lettuce-eat
+    restart: unless-stopped
+    env_file: .env.production
+    ports:
+      # Bound to loopback on purpose. The container is not reachable from the
+      # LAN; `tailscale serve` is the only thing in front of it.
+      - "127.0.0.1:8080:80"
+    volumes:
+      # The SQLite database and uploaded/generated files are the only state
+      # worth keeping. Everything else is rebuilt from the image.
+      #
+      # The database lives outside /app on purpose: /app/database holds the
+      # migrations, and mounting over it would hide them from the container.
+      - ./data/database:/var/lib/lettuce-eat
+      - ./data/storage:/app/storage
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s

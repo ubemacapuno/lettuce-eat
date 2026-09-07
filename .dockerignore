@@ -1,0 +1,40 @@
+.git
+.gitignore
+.github
+
+# Rebuilt inside the image by the vendor/assets stages.
+node_modules
+vendor
+public/build
+public/hot
+public/storage
+
+# Local state must never leak into an image.
+.env
+.env.*
+data
+database/*.sqlite
+database/*.sqlite-shm
+database/*.sqlite-wal
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+storage/pail
+
+# Package-discovery and compiled-service manifests generated on the dev machine,
+# where require-dev packages exist. The image installs --no-dev, so shipping
+# these makes it boot with references to classes that aren't there.
+bootstrap/cache/*.php
+
+# Not needed at runtime.
+tests
+phpunit.xml
+.ai
+.claude
+.cursor
+.idea
+.junie
+.editorconfig
+.DS_Store
+*.md
