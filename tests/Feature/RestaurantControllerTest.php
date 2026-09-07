@@ -89,7 +89,7 @@ test('a user can update their own restaurant', function () {
     $this->actingAs($user)
         ->put(route('restaurants.update', $restaurant), [
             'name' => 'New Name',
-            'rating' => 3.2,
+            'rating' => 3.5,
         ])
         ->assertRedirect(route('restaurants.show', $restaurant));
 
