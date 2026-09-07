@@ -77,7 +77,7 @@ class DishController extends Controller
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'rating' => ['nullable', 'numeric', 'between:1,5', 'decimal:0,1'],
+            'rating' => ['nullable', 'numeric', 'between:1,5', 'multiple_of:0.5'],
             'notes' => ['nullable', 'string'],
             'order_again' => ['nullable', 'boolean'],
         ];
@@ -91,7 +91,7 @@ class DishController extends Controller
         return [
             'name.required' => 'What is the dish called?',
             'rating.between' => 'Rating must be between 1 and 5 stars.',
-            'rating.decimal' => 'Use at most one decimal place, like 4.5.',
+            'rating.multiple_of' => 'Ratings go in half stars, like 4 or 4.5.',
         ];
     }
 }

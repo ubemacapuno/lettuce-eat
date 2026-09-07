@@ -21,7 +21,7 @@ class RestaurantFactory extends Factory
         return [
             'user_id' => User::factory(),
             'name' => fake()->company(),
-            'rating' => fake()->randomFloat(1, 1, 5),
+            'rating' => fake()->numberBetween(2, 10) / 2,
             'notes' => fake()->sentence(),
             'street_address' => fake()->streetAddress(),
             'city' => fake()->city(),

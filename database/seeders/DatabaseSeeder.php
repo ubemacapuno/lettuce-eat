@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
         ]);
         Dish::factory()->for($portillos)->create([
             'name' => 'Cake Shake',
-            'rating' => 3.8,
+            'rating' => 4.0,
             'notes' => 'Order sparingly, very sweet!',
             'order_again' => false,
         ]);
