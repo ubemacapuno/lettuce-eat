@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Dish;
+use App\Models\Recipes;
 use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -46,11 +47,15 @@ class DatabaseSeeder extends Seeder
             'order_again' => false,
         ]);
 
-        // seed more restaurants and dishes
         Restaurant::factory()
             ->count(5)
             ->for($user)
             ->has(Dish::factory()->count(3))
+            ->create();
+
+        Recipes::factory()
+            ->count(5)
+            ->for($user)
             ->create();
     }
 }
