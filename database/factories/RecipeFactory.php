@@ -2,14 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Models\Recipes;
+use App\Models\Recipe;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Recipes>
+ * @extends Factory<Recipe>
  */
-class RecipesFactory extends Factory
+class RecipeFactory extends Factory
 {
     /**
      * Recipes and instructions are markdown compatible,

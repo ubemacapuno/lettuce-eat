@@ -24,6 +24,11 @@ class User extends Authenticatable
         return $this->hasMany(Restaurant::class);
     }
 
+    public function recipes(): HasMany
+    {
+        return $this->hasMany(Recipe::class);
+    }
+
     public function dishes(): HasManyThrough
     {
         return $this->hasManyThrough(Dish::class, Restaurant::class);

@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Dish;
-use App\Models\Recipes;
+use App\Models\Recipe;
 use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
             ->has(Dish::factory()->count(3))
             ->create();
 
-        Recipes::factory()
+        Recipe::factory()
             ->count(5)
             ->for($user)
             ->create();
