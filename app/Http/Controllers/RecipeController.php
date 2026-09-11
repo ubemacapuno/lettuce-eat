@@ -58,8 +58,8 @@ class RecipeController extends Controller
         $recipe->update($request->validate($this->rules(), $this->messages()));
 
         return redirect()
-            ->route('restaurants.show', $recipe)
-            ->with('success', 'Updated!');
+            ->route('recipes.show', $recipe)
+            ->with('success', $recipe->wasChanged() ? 'Updated!' : 'No changes to save.');
     }
 
     public function destroy(Recipe $recipe): RedirectResponse

@@ -2,8 +2,21 @@
     $user = Auth::user();
 
     $navLinks = [
-        ['label' => __('Dashboard'), 'href' => route('dashboard'), 'active' => request()->routeIs('dashboard')],
-        ['label' => __('Restaurants'), 'href' => route('restaurants.index'), 'active' => request()->routeIs('restaurants.*') || request()->routeIs('dishes.*')],
+        [
+            'label' => __('Dashboard'),
+            'href' => route('dashboard'),
+            'active' => request()->routeIs('dashboard'),
+        ],
+        [
+            'label' => __('Restaurants'),
+            'href' => route('restaurants.index'),
+            'active' => request()->routeIs('restaurants.*') || request()->routeIs('dishes.*'),
+        ],
+        [
+            'label' => __('Recipes'),
+            'href' => route('recipes.index'),
+            'active' => request()->routeIs('recipes.*'),
+        ],
     ];
 @endphp
 
@@ -28,14 +41,17 @@
 
             {{-- Desktop: user dropdown --}}
             <details class="group relative hidden sm:block" data-dismiss-on-outside-click>
-                <summary class="cursor-pointer list-none [&::-webkit-details-marker]:hidden inline-flex h-8 items-center gap-2 rounded-md px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-                    <span class="flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
+                <summary
+                    class="cursor-pointer list-none [&::-webkit-details-marker]:hidden inline-flex h-8 items-center gap-2 rounded-md px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                    <span
+                        class="flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
                         {{ Str::upper(Str::substr($user->name, 0, 1)) }}
                     </span>
                     {{ $user->name }}
                 </summary>
 
-                <div class="absolute end-0 z-50 mt-2 w-56 origin-top-right rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md">
+                <div
+                    class="absolute end-0 z-50 mt-2 w-56 origin-top-right rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md">
                     <div class="px-2 py-1.5">
                         <p class="text-sm font-medium leading-none">{{ $user->name }}</p>
                         <p class="mt-1 truncate text-xs text-muted-foreground">{{ $user->email }}</p>
@@ -56,12 +72,13 @@
 
             {{-- Mobile: hamburger --}}
             <details class="group sm:hidden" data-dismiss-on-outside-click>
-                <summary class="cursor-pointer list-none [&::-webkit-details-marker]:hidden inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                <summary
+                    class="cursor-pointer list-none [&::-webkit-details-marker]:hidden inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
                     <svg class="h-5 w-5" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              class="group-open:hidden" d="M4 6h16M4 12h16M4 18h16" />
+                              class="group-open:hidden" d="M4 6h16M4 12h16M4 18h16"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              class="hidden group-open:block" d="M6 18L18 6M6 6l12 12" />
+                              class="hidden group-open:block" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </summary>
 
