@@ -86,6 +86,7 @@ class RecipeController extends Controller
             'source_url' => ['nullable', 'string'],
             'total_minutes' => ['nullable', 'integer', 'min:1', 'max:10080'],
             'servings' => ['nullable', 'integer', 'min:1', 'max:255'],
+            'make_again' => ['boolean'],
         ];
     }
 

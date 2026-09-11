@@ -32,6 +32,7 @@ class Recipe extends Model
     {
         return [
             'rating' => 'decimal:1',
+            'make_again' => 'boolean',
         ];
     }
 }
