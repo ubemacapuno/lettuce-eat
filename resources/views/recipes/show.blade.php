@@ -52,7 +52,7 @@
                     'label' => 'Delete',
                     'action' => route('recipes.destroy', $recipe),
                     'variant' => 'outline',
-                    'title' => "Delete {$recipe->name}?",
+                    'title' => 'Delete '.$recipe->name.'?',
                     'message' => 'The ingredients and instructions go with it. This cannot be undone.',
                     'confirmLabel' => 'Delete',
                 ]) }}"></div>

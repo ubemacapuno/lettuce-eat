@@ -28,7 +28,7 @@
                     'label' => 'Delete',
                     'action' => route('restaurants.destroy', $restaurant),
                     'variant' => 'outline',
-                    'title' => "Delete {$restaurant->name}?",
+                    'title' => 'Delete '.$restaurant->name.'?',
                     'message' => 'Every dish you logged here goes with it. This cannot be undone.',
                     'confirmLabel' => 'Delete',
                 ]) }}"></div>
@@ -105,7 +105,7 @@
                                 'label' => 'Remove',
                                 'action' => route('dishes.destroy', $dish),
                                 'variant' => 'link',
-                                'title' => "Remove {$dish->name}?",
+                                'title' => 'Remove '.$dish->name.'?',
                                 'message' => 'This cannot be undone.',
                                 'confirmLabel' => 'Remove',
                             ]) }}"></div>
