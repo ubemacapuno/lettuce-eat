@@ -1,9 +1,9 @@
 {
     "mcpServers": {
         "laravel-boost": {
-            "command": "/Users/fastdmscorey/Library/Application Support/Herd/bin/php84",
+            "command": "php",
             "args": [
-                "/Users/fastdmscorey/Herd/lettuce-eat/artisan",
+                "artisan",
                 "boost:mcp"
             ]
         }
