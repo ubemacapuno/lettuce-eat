@@ -12,11 +12,12 @@ class RecipeController extends Controller
 {
     public function index(Request $request): View
     {
+        $recipes = $request->user()->recipes()
+            ->orderByRaw('lower(name)')
+            ->paginate(10);
+
         return view('recipes.index', [
-            'recipes' => $request->user()
-                ->recipes()
-                ->latest()
-                ->get(),
+            'recipes' => $recipes,
         ]);
     }
 

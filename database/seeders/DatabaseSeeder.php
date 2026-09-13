@@ -54,7 +54,7 @@ class DatabaseSeeder extends Seeder
             ->create();
 
         Recipe::factory()
-            ->count(5)
+            ->count(15)
             ->for($user)
             ->create();
     }

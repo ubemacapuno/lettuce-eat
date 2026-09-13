@@ -31,9 +31,23 @@
                     ← All recipes
                 </a>
 
-                <h2 class="mt-2 text-xl font-semibold tracking-tight text-foreground">
-                    {{ $recipe->name }}
-                </h2>
+                <div class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <h2 class="text-xl font-semibold tracking-tight text-foreground">
+                        {{ $recipe->name }}
+                    </h2>
+
+                    @if ($recipe->rating)
+                        <span class="text-base font-semibold tracking-tight text-foreground">
+                            ★ {{ $recipe->rating }}
+                        </span>
+                    @endif
+
+                    @if ($recipe->make_again)
+                        <span class="rounded-md bg-success/15 px-2 py-0.5 text-xs font-medium text-success">
+                            Make again
+                        </span>
+                    @endif
+                </div>
 
                 @if ($meta->isNotEmpty())
                     <p class="mt-1 text-sm text-muted-foreground">
@@ -64,32 +78,12 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             @include('partials.flash')
 
-            @if ($recipe->rating || $recipe->make_again || $recipe->source_url)
-                <div class="mb-8 rounded-lg border border-border bg-card p-5 shadow-sm">
-                    <div class="flex items-baseline justify-between gap-4">
-                        @if ($recipe->rating)
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-2xl font-semibold tracking-tight text-card-foreground">
-                                    {{ $recipe->rating }}
-                                </span>
-                                <span class="text-sm text-muted-foreground">/ 5</span>
-                            </div>
-                        @endif
-
-                        @if ($recipe->make_again)
-                            <span class="shrink-0 rounded-md bg-success/15 px-2 py-0.5 text-xs font-medium text-success">
-                                Make again
-                            </span>
-                        @endif
-                    </div>
-
-                    @if ($recipe->source_url)
-                        <a href="{{ $recipe->source_url }}" target="_blank" rel="noopener noreferrer"
-                           class="{{ $recipe->rating || $recipe->make_again ? 'mt-3 ' : '' }}block truncate text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground">
-                            {{ $recipe->source_url }}
-                        </a>
-                    @endif
-                </div>
+            @if ($recipe->source_url)
+                <a href="{{ $recipe->source_url }}" target="_blank" rel="noopener noreferrer"
+                   class="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+                    <span aria-hidden="true">↗</span>
+                    <span class="min-w-0 truncate underline underline-offset-4">{{ $recipe->source_url }}</span>
+                </a>
             @endif
 
             @if ($recipe->ingredients || $recipe->instructions)

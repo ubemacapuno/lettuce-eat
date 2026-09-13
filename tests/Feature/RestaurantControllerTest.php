@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Dish;
 use App\Models\Restaurant;
 use App\Models\User;
 
@@ -140,4 +141,89 @@ test('the edit form renders prefilled', function () {
         ->assertSuccessful()
         ->assertSee('Portillos')
         ->assertSee('Gilbert');
+});
+
+test('dishes are listed alphabetically regardless of case', function () {
+    $user = User::factory()->create();
+    $restaurant = Restaurant::factory()->for($user)->create();
+
+    foreach (['zeppole', 'Arancini', 'cake Shake'] as $name) {
+        Dish::factory()->for($restaurant)->create(['name' => $name, 'order_again' => false]);
+    }
+
+    $this->actingAs($user)
+        ->get(route('restaurants.show', $restaurant))
+        ->assertSuccessful()
+        ->assertSeeInOrder(['Arancini', 'cake Shake', 'zeppole']);
+});
+
+test('dishes worth repeating float above the rest', function () {
+    $user = User::factory()->create();
+    $restaurant = Restaurant::factory()->for($user)->create();
+
+    Dish::factory()->for($restaurant)->create(['name' => 'Arancini', 'order_again' => false]);
+    Dish::factory()->for($restaurant)->create(['name' => 'Zeppole', 'order_again' => true]);
+    Dish::factory()->for($restaurant)->create(['name' => 'Bomboloni', 'order_again' => true]);
+
+    $this->actingAs($user)
+        ->get(route('restaurants.show', $restaurant))
+        ->assertSuccessful()
+        ->assertSeeInOrder(['Bomboloni', 'Zeppole', 'Arancini']);
+});
+
+test('the show page summarises the dishes logged at a restaurant', function () {
+    $user = User::factory()->create();
+    $restaurant = Restaurant::factory()->for($user)->create();
+
+    Dish::factory()->for($restaurant)->create(['rating' => 4.5, 'order_again' => true]);
+    Dish::factory()->for($restaurant)->create(['rating' => 3.5, 'order_again' => true]);
+    Dish::factory()->for($restaurant)->create(['rating' => null, 'order_again' => false]);
+
+    $this->actingAs($user)
+        ->get(route('restaurants.show', $restaurant))
+        ->assertSuccessful()
+        ->assertSee('3 dishes')
+        ->assertSee('4.0 avg')
+        ->assertSee('2 worth repeating');
+});
+
+test('unrated dishes are left out of the average', function () {
+    $user = User::factory()->create();
+    $restaurant = Restaurant::factory()->for($user)->create();
+
+    Dish::factory()->for($restaurant)->create(['rating' => 5.0]);
+    Dish::factory()->for($restaurant)->create(['rating' => null]);
+
+    $this->actingAs($user)
+        ->get(route('restaurants.show', $restaurant))
+        ->assertSuccessful()
+        ->assertSee('5.0 avg')
+        ->assertDontSee('2.5 avg');
+});
+
+test('a restaurant with no dishes shows no dish summary', function () {
+    $user = User::factory()->create();
+    $restaurant = Restaurant::factory()->for($user)->create();
+
+    $response = $this->actingAs($user)
+        ->get(route('restaurants.show', $restaurant))
+        ->assertSuccessful()
+        ->assertSee('No dishes logged here yet');
+
+    expect($response->getContent())
+        ->not->toMatch('/\\d+ dishe?s?\\b/')
+        ->not->toMatch('/\\d+ worth repeating/');
+});
+
+test('the index orders restaurants alphabetically', function () {
+    $user = User::factory()->create();
+
+    foreach (['zizzis', 'Alinea', 'portillos'] as $name) {
+        Restaurant::factory()->for($user)->create(['name' => $name]);
+    }
+
+    $this->actingAs($user)
+        ->get(route('restaurants.index'))
+        ->assertSuccessful()
+        ->assertSeeInOrder(['Alinea', 'portillos', 'zizzis']);
 });

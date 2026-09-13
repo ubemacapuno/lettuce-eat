@@ -48,6 +48,9 @@
                     </div>
                 @endforelse
             </div>
+            <div class="mt-6">
+                {{ $recipes->links() }}
+            </div>
         </div>
     </div>
 </x-app-layout>

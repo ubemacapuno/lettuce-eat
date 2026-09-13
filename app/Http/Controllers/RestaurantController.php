@@ -16,7 +16,7 @@ class RestaurantController extends Controller
             'restaurants' => $request->user()
                 ->restaurants()
                 ->withCount('dishes')
-                ->latest()
+                ->orderByRaw('lower(name)')
                 ->get(),
         ]);
     }
@@ -41,7 +41,7 @@ class RestaurantController extends Controller
     {
         Gate::authorize('view', $restaurant);
 
-        $restaurant->load('dishes');
+        $restaurant->load(['dishes' => fn ($query) => $query->orderByRaw('order_again desc, lower(name)')]);
 
         return view('restaurants.show', ['restaurant' => $restaurant]);
     }

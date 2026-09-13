@@ -194,7 +194,8 @@ test('the show page prompts for details when nothing is written down', function 
     $this->actingAs($user)
         ->get(route('recipes.show', $recipe))
         ->assertSuccessful()
-        ->assertSee('Nothing written down yet');
+        ->assertSee('Nothing written down yet')
+        ->assertSee('★ '.$recipe->rating);
 });
 
 test('a source link that is not an http url is rejected', function (string $url) {
@@ -235,4 +236,17 @@ test('the show page renders the source link, timing and make again badge', funct
         ->assertSee($recipe->total_minutes.' min')
         ->assertSee(Str::plural('serving', $recipe->servings), false)
         ->assertSee('href="'.e($recipe->source_url).'"', false);
+});
+
+test('the index lists recipes alphabetically, ignoring case', function () {
+    $user = User::factory()->create();
+
+    foreach (['Zucchini Fritters', 'adobo', 'Pinakbet'] as $name) {
+        Recipe::factory()->for($user)->create(['name' => $name]);
+    }
+
+    $this->actingAs($user)
+        ->get(route('recipes.index'))
+        ->assertSuccessful()
+        ->assertSeeInOrder(['adobo', 'Pinakbet', 'Zucchini Fritters']);
 });

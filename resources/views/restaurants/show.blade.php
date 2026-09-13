@@ -1,3 +1,15 @@
+@php
+    $dishes = $restaurant->dishes;
+    $ratedDishes = $dishes->whereNotNull('rating');
+    $repeatCount = $dishes->where('order_again', true)->count();
+
+    $dishStats = collect([
+        $dishes->isNotEmpty() ? $dishes->count().' '.Str::plural('dish', $dishes->count()) : null,
+        $ratedDishes->isNotEmpty() ? '★ '.number_format($ratedDishes->avg('rating'), 1).' avg' : null,
+        $repeatCount ? $repeatCount.' worth repeating' : null,
+    ])->filter();
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-start justify-between gap-4">
@@ -40,12 +52,12 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             @include('partials.flash')
 
-            @if ($restaurant->rating || $restaurant->notes)
+            @if ($restaurant->rating || $restaurant->notes || $dishStats->isNotEmpty())
                 <div class="mb-8 rounded-lg border border-border bg-card p-5 shadow-sm">
                     @if ($restaurant->rating)
                         <div class="flex items-baseline gap-2">
                             <span class="text-2xl font-semibold tracking-tight text-card-foreground">
-                                {{ $restaurant->rating }}
+                                ★ {{ $restaurant->rating }}
                             </span>
                             <span class="text-sm text-muted-foreground">/ 5</span>
                         </div>
@@ -54,6 +66,12 @@
                     @if ($restaurant->notes)
                         <p class="{{ $restaurant->rating ? 'mt-3 ' : '' }}text-sm leading-relaxed text-muted-foreground">
                             {{ $restaurant->notes }}
+                        </p>
+                    @endif
+
+                    @if ($dishStats->isNotEmpty())
+                        <p class="{{ $restaurant->rating || $restaurant->notes ? 'mt-4 border-t border-border pt-4 ' : '' }}text-sm text-muted-foreground">
+                            {{ $dishStats->join(' · ') }}
                         </p>
                     @endif
                 </div>
@@ -72,7 +90,7 @@
 
             <div class="space-y-3">
                 @forelse ($restaurant->dishes as $dish)
-                    <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
+                    <div class="rounded-lg border border-border bg-card px-4 py-3 shadow-sm">
                         <div class="flex items-baseline justify-between gap-4">
                             <h4 class="font-medium text-card-foreground">{{ $dish->name }}</h4>
 
@@ -92,10 +110,10 @@
                         </div>
 
                         @if ($dish->notes)
-                            <p class="mt-2 text-sm leading-relaxed text-muted-foreground">{{ $dish->notes }}</p>
+                            <p class="mt-1 text-sm leading-relaxed text-muted-foreground">{{ $dish->notes }}</p>
                         @endif
 
-                        <div class="mt-3 flex items-center gap-3 border-t border-border pt-3">
+                        <div class="mt-2 flex items-center gap-3">
                             <a href="{{ route('dishes.edit', $dish) }}"
                                class="text-sm text-muted-foreground transition-colors hover:text-foreground">
                                 Edit

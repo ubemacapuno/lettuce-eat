@@ -121,7 +121,7 @@ class RecipeFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'name' => $recipe['name'],
+            'name' => fake()->boolean() ? $recipe['name'] : Str::title(fake()->words(3, true)),
             'rating' => fake()->numberBetween(2, 10) / 2,
             'ingredients' => $recipe['ingredients'],
             'instructions' => $recipe['instructions'],
