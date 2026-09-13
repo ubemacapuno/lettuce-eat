@@ -4,7 +4,6 @@ import defaultTheme from 'tailwindcss/defaultTheme';
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
-        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
         './resources/js/**/*.vue',
@@ -13,7 +12,23 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['DM Sans', ...defaultTheme.fontFamily.sans],
+                mono: ['Space Mono', ...defaultTheme.fontFamily.mono],
+            },
+
+            // neo-brutalist: hard offset, zero blur, in the border colour so it
+            // stays visible against the black page background
+            boxShadow: {
+                sm: '2px 2px 0 0 hsl(var(--border))',
+                DEFAULT: '3px 3px 0 0 hsl(var(--border))',
+                md: '4px 4px 0 0 hsl(var(--border))',
+                lg: '6px 6px 0 0 hsl(var(--border))',
+                xl: '8px 8px 0 0 hsl(var(--border))',
+                none: 'none',
+            },
+
+            borderWidth: {
+                DEFAULT: '2px',
             },
 
             colors: {

@@ -2,40 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: 'DM Sans';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: optional;
+    src: url('/fonts/dm-sans-latin.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Space Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: optional;
+    src: url('/fonts/space-mono-400-latin.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Space Mono';
+    font-style: normal;
+    font-weight: 700;
+    font-display: optional;
+    src: url('/fonts/space-mono-700-latin.woff2') format('woff2');
+}
+
 @layer base {
     :root {
-        --background: 240 10% 3.9%;
-        --foreground: 0 0% 98%;
+        --background: 0 0% 0%;
+        --foreground: 0 0% 100%;
 
-        --card: 240 6% 7%;
-        --card-foreground: 0 0% 98%;
+        --card: 0 0% 20%;
+        --card-foreground: 0 0% 100%;
 
-        --popover: 240 6% 8%;
-        --popover-foreground: 0 0% 98%;
+        --popover: 0 0% 20%;
+        --popover-foreground: 0 0% 100%;
 
-        --primary: 0 0% 98%;
-        --primary-foreground: 240 5.9% 10%;
+        --primary: 120 100% 70%;
+        --primary-foreground: 0 0% 0%;
 
-        --secondary: 240 3.7% 15.9%;
-        --secondary-foreground: 0 0% 98%;
+        --secondary: 60 100% 60%;
+        --secondary-foreground: 0 0% 0%;
 
-        --muted: 240 3.7% 15.9%;
-        --muted-foreground: 240 5% 64.9%;
+        --muted: 0 0% 10%;
+        --muted-foreground: 0 0% 80%;
 
-        --accent: 240 3.7% 15.9%;
-        --accent-foreground: 0 0% 98%;
+        --accent: 210 100% 60%;
+        --accent-foreground: 0 0% 0%;
 
-        --destructive: 0 72% 51%;
-        --destructive-foreground: 0 0% 98%;
+        --destructive: 0 100% 60%;
+        --destructive-foreground: 0 0% 0%;
 
-        --success: 142 71% 45%;
-        --warning: 38 92% 50%;
+        --success: 145 65% 45%;
 
-        --border: 240 3.7% 15.9%;
-        --input: 240 3.7% 15.9%;
-        --ring: 240 4.9% 83.9%;
+        --border: 0 0% 100%;
+        --input: 0 0% 100%;
+        --ring: 120 100% 70%;
 
-        --radius: 0.5rem;
+        --radius: 0rem;
     }
 
     * {
