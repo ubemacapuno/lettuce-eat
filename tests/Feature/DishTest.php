@@ -72,3 +72,21 @@ test('the parent restaurant cannot be mass assigned', function () {
 
     expect($dish->restaurant_id)->toBe($mine->id);
 });
+
+test('the reviewed state produces a dish that has been judged', function () {
+    $dishes = Dish::factory()->count(40)->reviewed()->create();
+
+    $dishes->each(function (Dish $dish) {
+        expect($dish->order_again)->toBeBool();
+
+        if ($dish->rating !== null) {
+            expect((float) $dish->rating)
+                ->toBeGreaterThanOrEqual(1.0)
+                ->toBeLessThanOrEqual(5.0)
+                ->and(fmod((float) $dish->rating * 10, 5))->toBe(0.0);
+        }
+    });
+
+    expect($dishes->pluck('order_again')->unique())->toHaveCount(2)
+        ->and($dishes->whereNotNull('rating'))->not->toBeEmpty();
+});

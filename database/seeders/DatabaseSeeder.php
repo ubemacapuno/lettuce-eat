@@ -50,11 +50,21 @@ class DatabaseSeeder extends Seeder
         Restaurant::factory()
             ->count(5)
             ->for($user)
-            ->has(Dish::factory()->count(3))
+            ->has(Dish::factory()->count(3)->reviewed())
             ->create();
 
+        // most recipes are fully filled out, with a verdict on roughly two thirds
         Recipe::factory()
-            ->count(15)
+            ->count(12)
+            ->for($user)
+            ->withDetails()
+            ->create([
+                'make_again' => fn (): bool => fake()->boolean(65),
+            ]);
+
+        // a few that were jotted down and never revisited
+        Recipe::factory()
+            ->count(3)
             ->for($user)
             ->create();
     }

@@ -34,4 +34,13 @@ class DishFactory extends Factory
             ]),
         ];
     }
+
+    public function reviewed(): static
+    {
+        return $this->state(fn (): array => [
+            'rating' => fake()->boolean(85) ? fake()->numberBetween(2, 10) / 2 : null,
+            'notes' => fake()->boolean(60) ? fake()->sentence() : null,
+            'order_again' => fake()->boolean(55),
+        ]);
+    }
 }
