@@ -83,7 +83,7 @@ class RecipeController extends Controller
             'rating' => ['nullable', 'numeric', 'between:1,5', 'multiple_of:0.5'],
             'ingredients' => ['nullable', 'string'],
             'instructions' => ['nullable', 'string'],
-            'source_url' => ['nullable', 'string'],
+            'source_url' => ['nullable', 'url:http,https', 'max:255'],
             'total_minutes' => ['nullable', 'integer', 'min:1', 'max:10080'],
             'servings' => ['nullable', 'integer', 'min:1', 'max:255'],
             'make_again' => ['boolean'],
@@ -99,6 +99,7 @@ class RecipeController extends Controller
             'name.required' => 'What is the recipe called?',
             'rating.between' => 'Rating must be between 1 and 5 stars.',
             'rating.multiple_of' => 'Ratings go in half stars, like 4 or 4.5.',
+            'source_url.url' => 'That does not look like a link. Start it with https://.',
         ];
     }
 }

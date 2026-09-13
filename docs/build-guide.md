@@ -2613,3 +2613,325 @@ public function tags(): BelongsToMany
 
 Same `tags` table, so "vegetarian" is one row that both a restaurant and a dish can
 point at, and your autocomplete stays a single list.
+
+---
+---
+
+# 🔖 Recipes
+
+**Status: shipped.** The migration, the `Recipe` model, `RecipeFactory`, the routes, the
+`resources/views/recipes/` views, `RecipeController` (full resource) and `RecipePolicy`
+are all in, covered by `tests/Feature/RecipeControllerTest.php` and
+`RecipePolicyTest.php`. The decisions below are kept as the record of *why* it looks the
+way it does — not as a to-do list.
+
+Recipes are the third top-level thing in the app: restaurants you go to, and recipes you
+cook at home. The important structural point is that **recipes do not hang off
+restaurants**. A `Dish` belongs to a `Restaurant` because a dish only exists in the
+context of a place. A recipe has no such parent — it belongs directly to you. So
+`recipes` gets a `user_id` and its own top-level route, exactly like `restaurants` does,
+and *unlike* `dishes`.
+
+## The question: one markdown field or two?
+
+You'd flagged that if you're adding a markdown editor anyway, ingredients and
+how-to-cook could collapse into a single body field, since markdown already gives you
+headings and lists.
+
+**Recommendation: keep them as two `text` columns, both markdown.**
+
+Three reasons, in order of how much they'll actually bite you.
+
+### 1. Mobile cooking is the deciding factor
+
+This is the one that matters. At the stove you bounce between *"what do I need"* and
+*"what's step 4."* With one blob, every trip back to step 4 scrolls past the entire
+ingredient list. With two columns, the show page can render two independent
+sections — so ingredients can be collapsed while you cook and pinned open while you
+shop. You can't offer that on a single field without parsing headings back out of the
+markdown, which is exactly the kind of string-sniffing you don't want in a Blade view.
+
+### 2. Splitting later is expensive; merging later is free
+
+If you go one-field and later want a shopping list, ingredient search, or "what can I
+make with what's in the fridge," you're writing a markdown-heading parser and
+backfilling every existing row through it. Going the other direction — two columns into
+one — is string concatenation. **When changing your mind in one direction costs a
+migration and a backfill, and the other direction costs a `.` operator, start on the
+side that's cheap to leave.**
+
+### 3. You lose nothing in the editor
+
+Headings, bold, and nested lists all still work *inside* each field. It's the same
+editor component rendered twice. The entire cost of this decision is one extra
+`<textarea>` on the create form.
+
+## The schema
+
+✅ Shipped as written, in `create_recipes_table`.
+
+```php
+Schema::create('recipes', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+    $table->string('name');
+    $table->decimal('rating', 2, 1)->nullable();
+    $table->text('ingredients')->nullable();   // markdown
+    $table->text('instructions')->nullable();  // markdown
+    $table->string('source_url')->nullable();
+    $table->unsignedSmallInteger('total_minutes')->nullable();
+    $table->unsignedTinyInteger('servings')->nullable();
+    $table->boolean('make_again')->default(false);
+    $table->timestamps();
+});
+```
+
+The non-obvious columns:
+
+| Column | Why it's there |
+|---|---|
+| `user_id` | Recipes are top-level and user-owned, like `restaurants`. Needed for `$request->user()->recipes()` and for the policy. |
+| `rating` `decimal(2,1)` | An exact mirror of restaurants and dishes, so the existing `StarRating` island and the `multiple_of:0.5` rule drop straight in with no new code. |
+| `source_url` | The highest-value cheap column here. Almost every recipe comes from a site or a video, and you'll want to re-check the original. Nullable string, zero data-entry friction. |
+| `total_minutes` | Deliberately **one** field, not `prep_minutes` + `cook_minutes`. "How long is this" is the question you'll actually filter on, and two number inputs on a phone is friction you won't pay. |
+| `servings` | `unsignedTinyInteger` is plenty (max 255) and signals intent better than `integer`. |
+| `make_again` | Mirrors `dishes.order_again` on purpose — same vocabulary for the same idea keeps the app coherent. |
+
+**Deliberately skipped: `notes`.** Restaurants and dishes both have one, so leaving it
+off is a conscious break in symmetry. It overlaps almost completely with the
+`instructions` body, and three text fields on one mobile form is where the entry form
+starts feeling like a chore. "Last time I doubled the garlic" goes at the bottom of the
+instructions.
+
+**Deferred: `last_cooked_at`.** Genuinely nice — it unlocks a "haven't made this in a
+while" view. But it needs a UI affordance to set it, which makes it its own small
+feature rather than a free column. Add it when you build that view, not before.
+
+## ✅ The model is `Recipe`, not `Recipes`
+
+Done — model, factory, controller type hints, policy import, and the seeder all moved
+together, with `git mv` so history follows the files.
+
+The scaffold generated `Recipes` (plural). Laravel's convention is **singular model,
+plural table** — `Recipe` → `recipes`, the same as `Restaurant` → `restaurants`. The old
+name resolved the right table by luck (`Str::pluralStudly('Recipes')` is already
+`'Recipes'`), so nothing broke loudly, which is exactly what made it worth fixing before
+more code leaned on it.
+
+Two things the rename dragged along, both non-optional:
+
+**The factory had to move too.** Laravel resolves factories by naming convention:
+`Recipe` → `Database\Factories\RecipeFactory`. Leaving it as `RecipesFactory` would have
+broken `Recipe::factory()`, and therefore `DatabaseSeeder`, the moment the model was
+renamed.
+
+**It silently fixed policy discovery.** Laravel guesses `App\Policies\{Model}Policy`, so
+under the old name it was hunting for `RecipesPolicy`. `RecipePolicy` would have been
+ignored completely and every `Gate::authorize()` call would have failed closed with no
+error explaining why. Worth remembering the next time a policy "isn't firing" — check
+the model name before you debug the policy.
+
+The trait is typed the way the other models do it:
+
+```php
+/** @use HasFactory<RecipeFactory> */
+use HasFactory;
+```
+
+## 🔒 Recipes need a policy
+
+`RestaurantController` gates every non-index action with `Gate::authorize(...)`. Recipes
+need the same, or any logged-in user can read anyone else's. This is the same per-user
+rule that drives `user_id` on `tags` — nothing in this app is global.
+
+Scoping `index` through `$request->user()->recipes()` handles the listing; the policy
+covers `show`, `edit`, `update`, and `destroy`.
+
+## Validation
+
+✅ Shipped in `RecipeController::rules()`, following the shape of
+`RestaurantController::rules()`:
+
+```php
+[
+    'name' => ['required', 'string', 'max:255'],
+    'rating' => ['nullable', 'numeric', 'between:1,5', 'multiple_of:0.5'],
+    'ingredients' => ['nullable', 'string'],
+    'instructions' => ['nullable', 'string'],
+    'source_url' => ['nullable', 'url:http,https', 'max:255'],
+    'total_minutes' => ['nullable', 'integer', 'min:1', 'max:10080'],
+    'servings' => ['nullable', 'integer', 'min:1', 'max:255'],
+    'make_again' => ['boolean'],
+]
+```
+
+**⚠️ `source_url` carries two rules that both matter, for different reasons.**
+
+`max:255` is there because the migration shipped `$table->string('source_url')`, which is
+255 characters. Validation *looser* than the column is the one direction that actually
+breaks — a long URL with tracking params would pass the rule and then blow up at the
+database. If you ever want longer URLs, widen the column *first*, then raise the rule.
+
+`url:http,https` is the security half, and it is not optional. The show page renders the
+value straight into `href="{{ $recipe->source_url }}"`. Blade escapes entities but it
+does **not** escape the *scheme*, so with a plain `'string'` rule a saved
+`javascript:alert(document.cookie)` executes in your own origin the moment you click the
+link — and it sails through the form's `type="url"` check on the way in, because the
+browser considers it a perfectly valid absolute URL. Laravel 13's bare `url` rule happens
+to reject `javascript:` and `data:` already, but naming the two schemes you actually want
+is what makes the intent survive a framework upgrade. `tests/Feature/RecipeControllerTest.php`
+pins both halves.
+
+Keep the `rating` line character-for-character identical to the other two controllers.
+The half-star rule is enforced in three places now, and the day they drift is the day a
+seeded recipe fails to save.
+
+## Rendering the markdown
+
+**Good news: it's already installed.** `league/commonmark` is a hard requirement of
+`laravel/framework`, so `Str::markdown()` works today with no change to
+`composer.json`.
+
+Two rules:
+
+**Don't store rendered HTML.** Render on read. A `instructions_html` column is just a
+cache you now have to remember to invalidate on every edit.
+
+**⚠️ Strip raw HTML on the way out.** CommonMark passes raw HTML through by default, so
+pasting a block from a recipe site can inject markup into your page. Single-user or not,
+pass the options:
+
+```php
+Str::markdown($this->instructions, [
+    'html_input' => 'strip',
+    'allow_unsafe_links' => false,
+]);
+```
+
+An accessor on the model is a reasonable home for that, so the Blade view stays a plain
+`{!! $recipe->instructions_html !!}` and there's exactly one place the sanitising
+options live.
+
+## What to watch out for when you build the editor
+
+**Skip the WYSIWYG.** A full toolbar is miserable on a phone and it fights markdown
+rather than helping. The pattern that actually works on mobile, in rough order of
+value-per-line-of-code:
+
+1. **Auto-continue lists on Enter.** Type `- flour`, hit Enter, and `- ` is already
+   there. This single behaviour is most of what makes typing an ingredient list on a
+   phone bearable, and it's about ten lines.
+2. **A Write / Preview toggle.** Fits the existing Vue-island pattern from Part 4 — one
+   `data-vue="MarkdownField"` mount, used twice on the form.
+3. **A tiny sticky button row** that inserts at the cursor: bold, heading, list item.
+   Three buttons, not twelve.
+
+**The styling snag, and how it was settled.** `@tailwindcss/typography` is still not
+installed — `tailwind.config.js` only loads `forms` — so rendered markdown would arrive
+unstyled, with headings that don't look like headings. Two ways out were on the table:
+
+- Add the plugin. That's a dependency change, so it needs a decision rather than a
+  drive-by `npm install`.
+- Hand-write the rules for `h1–h3 / p / ul / ol / li / strong / em / blockquote / code / a`.
+
+✅ **The hand-rolled option shipped.** `resources/views/recipes/show.blade.php` builds a
+`$prose` string of Tailwind arbitrary variants (`[&_h2]:…`, `[&_ul]:…`) in a `@php` block
+at the top of the file and applies it to both rendered bodies. `package.json` stays
+untouched, which keeps this consistent with how the rest of the design system in Part 5
+was built.
+
+The one thing to know if you edit it: those classes only survive a production build
+because `tailwind.config.js` scans `resources/views/**/*.blade.php`, and the string is
+written as `.`-concatenated literals rather than interpolation. Build a class name
+dynamically there and Tailwind won't see it — it'll work in dev and vanish in
+`npm run build`.
+
+## Build order
+
+Get recipes usable first, make them pretty second:
+
+1. ✅ Migration, `Recipe` model + factory, `RecipePolicy`.
+2. ✅ `RecipeController` (full resource) and `Route::resource('recipes', ...)` inside the
+   `auth` group.
+3. ✅ Index / show / create / edit views, reusing `restaurants/partials/form.blade.php` as
+   the template — plain `<textarea>`s for now.
+4. ✅ Server-side markdown rendering on the show page.
+5. ⬜ *Then* the editor island.
+
+Steps 1–4 shipped, which is a working recipe book you can put real data into. Step 5 is a
+comfort upgrade you'll design better once you've typed a few recipes in the raw.
+
+## Explicitly out of scope: photos
+
+No image columns anywhere in the above. Photos are their own epic covering recipes,
+dishes, *and* restaurants together — storage driver, upload validation, resizing,
+and a rethink of the Docker volume layout on the Pi (`docs/deployment.md`). Doing it
+once across all three models is much less work than doing it three times.
+
+# Part 6: Shipping it to the Pi
+
+The step-by-step is in [`docs/deployment.md`](deployment.md) — prerequisites, deploy
+keys, `tailscale serve`, backups, and troubleshooting. This section is the *why*
+behind the shape it lands in, which is the part that gets forgotten first.
+
+## The shape
+
+```
+your laptop / phone  ──tailnet──►  tailscale serve (TLS)  ──►  127.0.0.1:8080
+                                                                     │
+                                                          one FrankenPHP container
+                                                                     │
+                                                            SQLite on a bind mount
+```
+
+One container, one file of state. No nginx, no php-fpm, no database server, no
+queue worker, no Redis.
+
+## Why each piece is absent
+
+**No database server.** Sessions, cache, and queue all point at SQLite, so the
+database is a file the app already knows how to open. For one user that deletes a
+whole container. `DB_JOURNAL_MODE=WAL` is set so reads don't block behind writes —
+without it a long-running server serializes every request against every write.
+
+**No nginx + php-fpm.** FrankenPHP is Caddy with PHP embedded. The usual two-process
+dance with a socket between them collapses into one process.
+
+**No queue worker.** There is no `app/Jobs` directory and nothing dispatches or
+schedules anything. The moment that stops being true, `compose.yaml` needs a second
+service running `queue:work` — `QUEUE_CONNECTION=database` means jobs will pile up
+silently in a table with nobody reading it, which fails quietly rather than loudly.
+
+## Two traps that cost real time
+
+**Never bind-mount over `/app/database`.** That directory is *code* — migrations,
+factories, seeders. Mounting a volume there hides them, and the container boots
+reporting "No migrations found" while cheerfully creating an empty database with
+only a `migrations` table in it. This is why `DB_DATABASE` points at
+`/var/lib/lettuce-eat/database.sqlite`, outside the app tree entirely. `/data` is
+taken too — Caddy uses it for its own storage inside the FrankenPHP image.
+
+**`bootstrap/cache/*.php` must stay in `.dockerignore`.** Those manifests are
+generated on a machine where require-dev packages exist. The image installs
+`--no-dev`, so shipping them makes the container boot referencing
+`Laravel\Boost\BoostServiceProvider`, which isn't in there.
+
+Both of these are recorded in `.ai/rules/general.md` so the next session doesn't
+rediscover them.
+
+## The proxy dependency
+
+`bootstrap/app.php` calls `trustProxies(at: '*')`. Tailscale terminates TLS and
+forwards plain HTTP to the container, so without this Laravel generates `http://`
+URLs on an `https://` page — which shows up as a login redirect loop and missing
+CSS, not as an obvious error. `tests/Feature/TrustedProxyTest.php` fails if that
+call is removed, which is the only reason it won't quietly regress.
+
+The `*` is safe *here specifically* because the only thing that can reach the
+container is `tailscale serve` on loopback. It would not be safe on a public box.
+
+## `serve`, never `funnel`
+
+`tailscale serve` publishes to your tailnet. `tailscale funnel` publishes to the
+public internet. One character of muscle memory apart, and the whole reason this
+app is comfortable being single-user with open registration during setup.

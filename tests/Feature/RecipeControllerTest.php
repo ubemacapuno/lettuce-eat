@@ -2,6 +2,7 @@
 
 use App\Models\Recipe;
 use App\Models\User;
+use Illuminate\Support\Str;
 
 test('guests are redirected to login', function (string $method, string $uri) {
     $this->$method($uri)->assertRedirect('/login');
@@ -194,4 +195,44 @@ test('the show page prompts for details when nothing is written down', function 
         ->get(route('recipes.show', $recipe))
         ->assertSuccessful()
         ->assertSee('Nothing written down yet');
+});
+
+test('a source link that is not an http url is rejected', function (string $url) {
+    $this->actingAs(User::factory()->create())
+        ->post(route('recipes.store'), ['name' => 'Test', 'source_url' => $url])
+        ->assertSessionHasErrors('source_url');
+})->with([
+    'javascript scheme' => 'javascript:alert(document.cookie)',
+    'data scheme' => 'data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==',
+    'bare domain' => 'example.com',
+    'longer than the column' => 'https://example.com/'.str_repeat('a', 250),
+]);
+
+test('an http source link is accepted', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->post(route('recipes.store'), [
+        'name' => 'Pinakbet',
+        'source_url' => 'https://example.com/recipes/pinakbet?utm_source=newsletter',
+    ])->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('recipes', [
+        'name' => 'Pinakbet',
+        'source_url' => 'https://example.com/recipes/pinakbet?utm_source=newsletter',
+    ]);
+});
+
+test('the show page renders the source link, timing and make again badge', function () {
+    $user = User::factory()->create();
+    $recipe = Recipe::factory()->for($user)->withDetails()->create([
+        'name' => 'Pinakbet',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('recipes.show', $recipe))
+        ->assertSuccessful()
+        ->assertSee('Make again')
+        ->assertSee($recipe->total_minutes.' min')
+        ->assertSee(Str::plural('serving', $recipe->servings), false)
+        ->assertSee('href="'.e($recipe->source_url).'"', false);
 });

@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Recipe;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Recipe>
@@ -125,5 +126,15 @@ class RecipeFactory extends Factory
             'ingredients' => $recipe['ingredients'],
             'instructions' => $recipe['instructions'],
         ];
+    }
+
+    public function withDetails(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'source_url' => 'https://example.com/recipes/'.Str::slug($attributes['name'] ?? fake()->word()),
+            'total_minutes' => fake()->numberBetween(10, 180),
+            'servings' => fake()->numberBetween(1, 8),
+            'make_again' => true,
+        ]);
     }
 }

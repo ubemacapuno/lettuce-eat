@@ -23,6 +23,7 @@ export default {
                 background: 'hsl(var(--background) / <alpha-value>)',
                 foreground: 'hsl(var(--foreground) / <alpha-value>)',
                 success: 'hsl(var(--success) / <alpha-value>)',
+                warning: 'hsl(var(--warning) / <alpha-value>)',
                 primary: {
                     DEFAULT: 'hsl(var(--primary) / <alpha-value>)',
                     foreground: 'hsl(var(--primary-foreground) / <alpha-value>)',
