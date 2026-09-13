@@ -67,6 +67,21 @@ sudo usermod -aG docker "$USER"
 
 Log out and back in for the group change to apply.
 
+Use this installer rather than Debian's own packages. It registers Compose as the
+`docker compose` subcommand, which is what every command in this document assumes.
+
+If you install from apt instead (`apt-get install docker.io docker-compose`), you get
+the standalone `docker-compose` binary and no plugin subcommand, so every
+`docker compose ...` below has to become `docker-compose ...`. Check which one you have:
+
+```bash
+docker compose version || docker-compose version
+```
+
+Note that the apt package names differ by release. Debian trixie calls it
+`docker-compose` (v2), while other releases and Ubuntu use `docker-compose-v2`, so a
+script that hardcodes one name will fail on the other.
+
 **3. Install Tailscale and join your tailnet.**
 
 ```bash
