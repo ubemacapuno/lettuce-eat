@@ -1,63 +1,96 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Lettuce Eat
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A self-hosted **food journal** for recipes I cook at home, and restaurants and dishes I've
+tried and want to log. It runs as a single container on a Raspberry Pi in my house, reachable only
+from my [Tailscale](https://tailscale.com/) network. Nothing is exposed to the public
+internet and no ports are forwarded on my router.
 
-## About Laravel
+## Why I built this
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+First, I wanted to get more practice building with **Laravel**.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Second, I wanted to learn **how to self-host something I built**.
+Deploying to a managed platform hides all the interesting parts. Putting it on a Pi
+meant I had to deal with the things a platform normally does for me: building an image
+that runs on ARM, picking a database that survives a reboot, getting TLS without owning
+a domain, and reaching the thing from my phone without opening my home network to the
+internet.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The app itself is deliberately small.
 
-## Learning Laravel
+## What it does
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Recipes**: ingredients, instructions, a rating, a link to the original, timing,
+  servings, and whether you'd make it again.
+- **Restaurants**: name, address, rating, and notes.
+- **Dishes**: logged under the restaurant you ate them at, with their own rating, notes,
+  and an "order again" flag.
+- **Half-star ratings** on all three.
+- **Private by default**: everything stays on the Pi.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+<!-- TODO: screenshots of the recipe and restaurant pages -->
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Tech stack
 
-## Agentic Development
+| Layer             | Tech                                                                                          |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| **Backend**       | Laravel 13, PHP 8.3+                                                                          |
+| **Frontend**      | Blade + Tailwind CSS v3, with Vue 3 "islands" mounted only where interactivity is needed      |
+| **Auth**          | Laravel Breeze                                                                                |
+| **Database**      | SQLite in WAL mode, with sessions, cache, and queue all living in the same file                |
+| **Build**         | Vite                                                                                          |
+| **Container**     | [FrankenPHP](https://frankenphp.dev/), which is Caddy with PHP embedded, so no nginx + php-fpm |
+| **Host**          | Raspberry Pi 4B running Docker Compose                                                        |
+| **Remote access** | Tailscale, a private VPN (tailnet), so the Pi is reachable from anywhere without port forwarding |
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+The frontend is server-rendered Blade, not a SPA. Vue is loaded as small islands
+(`data-vue="StarRating"`) for the three things that genuinely need client-side state,
+which are the star picker, delete confirmation, and auto-hiding flash messages.
+Everything else is plain HTML, which keeps the whole app one build step and one process.
 
-```bash
-composer require laravel/boost --dev
+## Flow Overview
 
-php artisan boost:install
+```
+your laptop / phone                    Raspberry Pi 4B
+─────────────────────                  ─────────────────────────────────────
+  Tailscale client                       tailscale serve  (TLS terminates here)
+         │                                        │
+         │  encrypted over your tailnet           │  plain HTTP, loopback only
+         └───────────────────────────────────────►│
+                                                  ▼
+                                          127.0.0.1:8080
+                                                  │
+                                                  ▼
+                                       Docker: lettuce-eat
+                                       FrankenPHP (Caddy + PHP)
+                                                  │
+                                                  ▼
+                                       SQLite file on a bind mount
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+One container, one file of state. No nginx, no php-fpm, no database server, no queue
+worker, no Redis.
 
-## Contributing
+Tailscale is what makes this comfortable to run at home. My devices and the Pi all join
+the same private tailnet, and I reach the app over that encrypted tunnel instead of
+exposing anything publicly. `tailscale serve` publishes to the tailnet only.
+`tailscale funnel` publishes to the internet, and is the one command to avoid here.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Getting started
 
-## Code of Conduct
+Locally:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+git clone git@github.com:ubemacapuno/lettuce-eat.git
+cd lettuce-eat
 
-## Security Vulnerabilities
+composer setup                 # install, .env, app key, migrate, npm install, build
+php artisan migrate --seed     # optional: a few restaurants, dishes, and recipes
+composer run dev               # http://127.0.0.1:8000
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Tests:
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
-## Self-hosting
-
-This app is built to run on a Raspberry Pi behind Tailscale, using SQLite and a
-single FrankenPHP container. See [docs/deployment.md](docs/deployment.md).
+```bash
+php artisan test --compact
+```
