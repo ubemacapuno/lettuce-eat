@@ -26,22 +26,19 @@
                 </p>
 
                 @auth
-                    <a href="{{ route('restaurants.index') }}"
-                       class="mt-8 inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
+                    <x-button-link :href="route('restaurants.index')" class="mt-8">
                         Go to my restaurants
-                    </a>
+                    </x-button-link>
                 @else
                     <div class="mt-8 flex items-center justify-center gap-3">
-                        <a href="{{ route('login') }}"
-                           class="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
+                        <x-button-link :href="route('login')">
                             Log in
-                        </a>
+                        </x-button-link>
 
                         @if (Route::has('register'))
-                            <a href="{{ route('register') }}"
-                               class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-transparent px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground">
+                            <x-button-link :href="route('register')" variant="secondary">
                                 Register
-                            </a>
+                            </x-button-link>
                         @endif
                     </div>
                 @endauth

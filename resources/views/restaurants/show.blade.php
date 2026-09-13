@@ -31,10 +31,9 @@
             </div>
 
             <div class="flex shrink-0 items-center gap-2">
-                <a href="{{ route('restaurants.edit', $restaurant) }}"
-                   class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-transparent px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground">
+                <x-button-link :href="route('restaurants.edit', $restaurant)" variant="secondary">
                     Edit
-                </a>
+                </x-button-link>
 
                 <div data-vue="ConfirmButton" data-props="{{ json_encode([
                     'label' => 'Delete',
@@ -82,10 +81,9 @@
                     Dishes
                 </h3>
 
-                <a href="{{ route('restaurants.dishes.create', $restaurant) }}"
-                   class="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
+                <x-button-link :href="route('restaurants.dishes.create', $restaurant)" size="sm">
                     Add dish
-                </a>
+                </x-button-link>
             </div>
 
             <div class="space-y-3">

@@ -10,10 +10,9 @@
                 </p>
             </div>
 
-            <a href="{{ route('recipes.create') }}"
-               class="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
+            <x-button-link :href="route('recipes.create')">
                 Add recipe
-            </a>
+            </x-button-link>
 
         </div>
     </x-slot>
@@ -41,10 +40,9 @@
                         <p class="text-sm font-medium text-foreground">No recipes yet</p>
                         <p class="mt-1 text-sm text-muted-foreground">Add your first one to get started.</p>
 
-                        <a href="{{ route('recipes.create') }}"
-                           class="mt-4 inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
+                        <x-button-link :href="route('recipes.create')" class="mt-4">
                             Add recipe
-                        </a>
+                        </x-button-link>
                     </div>
                 @endforelse
             </div>

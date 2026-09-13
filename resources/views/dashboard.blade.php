@@ -11,10 +11,15 @@
                 <div class="p-6 text-foreground">
                     <p>{{ __("You're logged in!") }}</p>
 
-                    <a href="{{ route('restaurants.index') }}"
-                       class="inline-block mt-4 px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-md hover:bg-primary/90">
-                        {{ __('Go to my restaurants') }}
-                    </a>
+                    <div class="flex flex-col gap-2">
+                        <x-button-link :href="route('restaurants.index')" class="mt-4">
+                            {{ __('Go to my restaurants') }}
+                        </x-button-link>
+
+                        <x-button-link :href="route('recipes.index')">
+                            {{ __('Go to my recipes') }}
+                        </x-button-link>
+                    </div>
                 </div>
             </div>
         </div>

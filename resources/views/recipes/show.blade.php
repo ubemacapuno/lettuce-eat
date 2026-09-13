@@ -57,10 +57,9 @@
             </div>
 
             <div class="flex shrink-0 items-center gap-2">
-                <a href="{{ route('recipes.edit', $recipe) }}"
-                   class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-transparent px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground">
+                <x-button-link :href="route('recipes.edit', $recipe)" variant="secondary">
                     Edit
-                </a>
+                </x-button-link>
 
                 <div data-vue="ConfirmButton" data-props="{{ json_encode([
                     'label' => 'Delete',
@@ -121,10 +120,9 @@
                     <p class="text-sm font-medium text-foreground">Nothing written down yet</p>
                     <p class="mt-1 text-sm text-muted-foreground">Add the ingredients and instructions so you can cook it again.</p>
 
-                    <a href="{{ route('recipes.edit', $recipe) }}"
-                       class="mt-4 inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
+                    <x-button-link :href="route('recipes.edit', $recipe)" class="mt-4">
                         Add details
-                    </a>
+                    </x-button-link>
                 </div>
             @endif
         </div>
