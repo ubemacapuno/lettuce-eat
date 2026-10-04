@@ -17,6 +17,7 @@ class Restaurant extends Model
         'name',
         'rating',
         'notes',
+        'phone',
         'street_address',
         'city',
         'state',
@@ -32,7 +33,8 @@ class Restaurant extends Model
         return $this->hasMany(Dish::class);
     }
 
-    protected function casts(): array{
+    protected function casts(): array
+    {
         return [
             'rating' => 'decimal:1',
         ];

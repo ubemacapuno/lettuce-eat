@@ -23,6 +23,7 @@ class RestaurantFactory extends Factory
             'name' => fake()->company(),
             'rating' => fake()->numberBetween(2, 10) / 2,
             'notes' => fake()->sentence(),
+            'phone' => fake()->phoneNumber(),
             'street_address' => fake()->streetAddress(),
             'city' => fake()->city(),
             'state' => fake()->stateAbbr(),

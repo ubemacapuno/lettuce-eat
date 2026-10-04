@@ -28,6 +28,15 @@
                         {{ collect([$restaurant->street_address, $restaurant->city, $restaurant->state])->filter()->join(', ') }}
                     </p>
                 @endif
+
+                @if ($restaurant->phone)
+                    <p class="mt-1 text-sm">
+                        <a href="tel:{{ $restaurant->phone }}"
+                           class="text-muted-foreground transition-colors hover:text-foreground">
+                            {{ $restaurant->phone }}
+                        </a>
+                    </p>
+                @endif
             </div>
 
             <div class="flex shrink-0 items-center gap-2">

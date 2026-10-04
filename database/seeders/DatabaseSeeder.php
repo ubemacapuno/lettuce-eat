@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             'name' => "Portillo's",
             'rating' => 4.5,
             'notes' => 'Fast line, always packed.',
+            'phone' => '(480) 123-4567',
             'street_address' => '1080 N McQueen Rd',
             'city' => 'Gilbert',
             'state' => 'AZ',

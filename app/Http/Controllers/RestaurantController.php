@@ -84,6 +84,7 @@ class RestaurantController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'rating' => ['nullable', 'numeric', 'between:1,5', 'multiple_of:0.5'],
             'notes' => ['nullable', 'string'],
+            'phone' => ['nullable', 'string', 'max:32'],
             'street_address' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
             'state' => ['nullable', 'string', 'max:255'],
