@@ -51,6 +51,45 @@ test('a restaurant is saved against the logged in user', function () {
     ]);
 });
 
+test('a phone number is saved and shown as a tel link', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('restaurants.store'), [
+            'name' => 'Portillos',
+            'phone' => '(480) 507-0007',
+        ])
+        ->assertRedirect();
+
+    $restaurant = Restaurant::query()->where('name', 'Portillos')->sole();
+
+    expect($restaurant->phone)->toBe('(480) 507-0007');
+
+    $this->actingAs($user)
+        ->get(route('restaurants.show', $restaurant))
+        ->assertSuccessful()
+        ->assertSee('href="tel:(480) 507-0007"', false);
+});
+
+test('a restaurant without a phone number shows no tel link', function () {
+    $user = User::factory()->create();
+    $restaurant = Restaurant::factory()->for($user)->create(['phone' => null]);
+
+    $this->actingAs($user)
+        ->get(route('restaurants.show', $restaurant))
+        ->assertSuccessful()
+        ->assertDontSee('href="tel:', false);
+});
+
+test('a phone number longer than the column is rejected', function () {
+    $this->actingAs(User::factory()->create())
+        ->post(route('restaurants.store'), [
+            'name' => 'Portillos',
+            'phone' => str_repeat('5', 33),
+        ])
+        ->assertSessionHasErrors('phone');
+});
+
 test('user_id cannot be forged through the form', function () {
     $me = User::factory()->create();
     $victim = User::factory()->create();
@@ -134,13 +173,15 @@ test('the edit form renders prefilled', function () {
     $restaurant = Restaurant::factory()->for($user)->create([
         'name' => 'Portillos',
         'city' => 'Gilbert',
+        'phone' => '(480) 123-4567',
     ]);
 
     $this->actingAs($user)
         ->get(route('restaurants.edit', $restaurant))
         ->assertSuccessful()
         ->assertSee('Portillos')
-        ->assertSee('Gilbert');
+        ->assertSee('Gilbert')
+        ->assertSee('(480) 123-4567');
 });
 
 test('dishes are listed alphabetically regardless of case', function () {

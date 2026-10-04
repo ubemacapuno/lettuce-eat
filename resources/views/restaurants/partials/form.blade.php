@@ -24,6 +24,13 @@
 </div>
 
 <div>
+    <x-input-label for="phone" :value="__('Phone')" />
+    <x-text-input id="phone" name="phone" type="tel" class="mt-1 block w-full"
+                  :value="old('phone', $restaurant?->phone)" />
+    <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+</div>
+
+<div>
     <x-input-label for="street_address" :value="__('Street address')" />
     <x-text-input id="street_address" name="street_address" type="text" class="mt-1 block w-full"
                   :value="old('street_address', $restaurant?->street_address)" />
